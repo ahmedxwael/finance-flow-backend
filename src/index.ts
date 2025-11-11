@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
   res.json({ message: "Hello World" });
 });
 
-app.post("/api/v1/test", validateRequest(testSchema), (req, res) => {
+app.post("/api/test", validateRequest(testSchema), (req, res) => {
   res.json({ message: "Test successful" });
 });
 
