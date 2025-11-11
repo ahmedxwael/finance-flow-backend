@@ -1,0 +1,10 @@
+# node
+node_modules/
+
+
+# env files
+.env
+*.local
+
+# typescript
+*.tsbuildinfo
