@@ -1,8 +1,12 @@
+// Ensure dotenv is loaded before reading env vars
 import "dotenv/config";
 
 // App Configuration
 export const PORT = process.env.PORT || 3000;
 export const __DEV__ = process.env.NODE_ENV === "development";
+
+// Log Level Configuration
+export const LOG_LEVEL = process.env.LOG_LEVEL || (__DEV__ ? "debug" : "info");
 
 // MongoDB Configuration
 export const DATABASE_NAME = process.env.DATABASE_NAME;

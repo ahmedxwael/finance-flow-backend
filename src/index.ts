@@ -1,5 +1,6 @@
 import express from "express";
-import { PORT, connectToDB } from "./config";
+import { connectToDB } from "./config";
+import { PORT } from "./config/env";
 import { errorHandler, notFoundHandler } from "./middlewares";
 import { log } from "./utils";
 

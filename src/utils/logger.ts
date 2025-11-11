@@ -1,9 +1,10 @@
+import { __DEV__, LOG_LEVEL } from "@/config/env";
 import dayjs from "dayjs";
 import pino from "pino";
-import { __DEV__ } from "../config";
 
 // Determine log level from environment or default to 'info'
-const logLevel = process.env.LOG_LEVEL || (__DEV__ ? "debug" : "info");
+const isDev = __DEV__;
+const logLevel = LOG_LEVEL || (isDev ? "debug" : "info");
 
 // Base logger configuration
 const baseConfig: pino.LoggerOptions = {
@@ -22,7 +23,7 @@ const baseConfig: pino.LoggerOptions = {
 
 export const log = pino({
   ...baseConfig,
-  ...(__DEV__
+  ...(isDev
     ? {
         transport: {
           target: "pino-pretty",
