@@ -22,16 +22,20 @@ const baseConfig: pino.LoggerOptions = {
 
 export const log = pino({
   ...baseConfig,
-  transport: {
-    target: "pino-pretty",
-    options: {
-      colorize: true,
-      ignore: "pid,hostname,env",
-      translateTime: "SYS:standard",
-      singleLine: false,
-      hideObject: false,
-    },
-  },
+  ...(__DEV__
+    ? {
+        transport: {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+            ignore: "pid,hostname,env",
+            translateTime: "SYS:standard",
+            singleLine: false,
+            hideObject: false,
+          },
+        },
+      }
+    : {}),
 });
 
 // Helper function for error logging with stack trace
