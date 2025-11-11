@@ -13,6 +13,10 @@ const testSchema = z.object({
   name: z.string().min(1),
 });
 
+app.get("/", (req, res) => {
+  res.json({ message: "Hello World" });
+});
+
 app.post("/api/v1/test", validateRequest(testSchema), (req, res) => {
   res.json({ message: "Test successful" });
 });
