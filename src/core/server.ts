@@ -1,10 +1,20 @@
-import express from "express";
+import express, { Express } from "express";
 import { PORT } from "../config/env";
 import { registerRoutes } from "../config/register-routes";
 import { errorHandler, notFoundHandler, staticFiles } from "../middlewares";
 import { log, logError } from "../shared/utils";
 
-export async function startServer(): Promise<void> {
+let appInstance: Express | null = null;
+
+/**
+ * Create and configure the Express app
+ * This function can be called multiple times but will return the same instance
+ */
+export async function createApp(): Promise<Express> {
+  if (appInstance) {
+    return appInstance;
+  }
+
   try {
     const app = express();
 
@@ -19,6 +29,21 @@ export async function startServer(): Promise<void> {
     // Error handlers
     app.use(errorHandler);
     app.use(notFoundHandler);
+
+    appInstance = app;
+    return app;
+  } catch (error) {
+    logError(error);
+    throw error;
+  }
+}
+
+/**
+ * Start the server (for local development)
+ */
+export async function startServer(): Promise<void> {
+  try {
+    const app = await createApp();
 
     // Start server
     app.listen(PORT, () => {
