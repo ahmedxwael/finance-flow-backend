@@ -1,6 +1,12 @@
 import { API_PREFIX } from "@/config/env";
-import { log } from "@/shared/utils";
-import { Express, RequestHandler } from "express";
+import { logRouteCompletion } from "@/shared/utils";
+import {
+  Express,
+  NextFunction,
+  Request,
+  RequestHandler,
+  Response,
+} from "express";
 
 export type RouteMethod = "get" | "post" | "put" | "patch" | "delete";
 
@@ -213,11 +219,28 @@ export class Router {
    */
   public scan(app: Express) {
     this.routes.forEach((route) => {
-      const handler = (...args: Parameters<RequestHandler>) => {
-        log.warn(
-          `${route.method.toUpperCase()} request for route: ${this.prefix}${route.path}`
-        );
-        route.handler(...args);
+      const handler = (
+        req: Request,
+        res: Response,
+        next: NextFunction
+      ): void => {
+        const startTime = Date.now();
+
+        // Track when response finishes to get actual status code
+        res.once("finish", () => {
+          const duration = Date.now() - startTime;
+          const statusCode = res.statusCode;
+
+          logRouteCompletion(
+            route.method,
+            `${this.prefix}${route.path}`,
+            statusCode,
+            duration
+          );
+        });
+
+        // Call the original handler
+        route.handler(req, res, next);
       };
 
       app[route.method](`${this.prefix}${route.path}`, handler);
