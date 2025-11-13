@@ -1,7 +1,6 @@
 export * from "./access-token";
 export * from "./format-date";
 export * from "./format-errors";
-export * from "./generate-otp";
 export * from "./get-token-from-headers";
 export * from "./hash-password";
 export * from "./logger";

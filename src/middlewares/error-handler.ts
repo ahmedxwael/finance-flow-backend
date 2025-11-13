@@ -1,6 +1,6 @@
+import { __DEV__ } from "@/config/env";
+import { log, logError } from "@/shared/utils";
 import { NextFunction, Request, Response } from "express";
-import { __DEV__ } from "../config";
-import { log, logError } from "../utils";
 
 export interface AppError extends Error {
   statusCode?: number;
@@ -42,8 +42,24 @@ export const errorHandler = (
   res.status(statusCode).json(errorResponse);
 };
 
+// Common browser/DevTools requests that should be silently ignored
+const IGNORED_404_PATHS = [
+  "/.well-known/",
+  "/favicon.ico",
+  "/robots.txt",
+  "/sitemap.xml",
+];
+
 export const notFoundHandler = (req: Request, res: Response) => {
-  log.warn(`Route ${req.method} ${req.url} not found`);
+  // Check if this is a common browser/DevTools request that should be ignored
+  const shouldIgnore = IGNORED_404_PATHS.some((path) =>
+    req.url.startsWith(path)
+  );
+
+  // Only log if it's not an ignored path
+  if (!shouldIgnore) {
+    log.warn(`Route ${req.method} ${req.url} not found`);
+  }
 
   return res.status(404).json({
     error: {

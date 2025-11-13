@@ -1,25 +1,3 @@
-import express from "express";
-import { connectToDB } from "./config";
-import { PORT } from "./config/env";
-import { errorHandler, notFoundHandler } from "./middlewares";
-import { log } from "./utils";
+import { startApplication } from "./core";
 
-const app = express();
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.get("/", (req, res) => {
-  res.json({ message: "Hello World" });
-});
-
-app.use(errorHandler);
-app.use(notFoundHandler);
-
-// Connect to database
-connectToDB();
-
-// Start server
-app.listen(PORT, () => {
-  log.info(`Server is running on port http://localhost:${PORT}`);
-});
+startApplication();

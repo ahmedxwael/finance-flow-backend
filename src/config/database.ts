@@ -1,5 +1,5 @@
+import { log, logError } from "@/shared/utils";
 import mongoose from "mongoose";
-import { log, logError } from "../utils";
 import {
   __DEV__,
   DATABASE_LOCAL_URL,

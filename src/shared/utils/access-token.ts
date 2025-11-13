@@ -1,5 +1,5 @@
+import { JWT_SECRET } from "@/config/env";
 import jwt, { SignOptions, VerifyOptions } from "jsonwebtoken";
-import { JWT_SECRET } from "../config";
 
 /**
  * Generate an access token
