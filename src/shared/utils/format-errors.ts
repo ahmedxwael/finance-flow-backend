@@ -1,4 +1,4 @@
-import { GenericObject } from "@/types";
+import { GenericObject } from "../../types";
 import { ZodError } from "zod";
 
 export const formatZodErrors = (errors: ZodError<Record<string, unknown>>) => {

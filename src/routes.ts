@@ -49,8 +49,10 @@ export async function importRoutes() {
         routeFile.replace(/\.ts$/, "")
       );
 
-      // Convert Windows paths to forward slashes and use @ alias
-      const importPath = `@/${relativePath.replace(/\\/g, "/")}`;
+      // Convert Windows paths to forward slashes and create relative import path
+      const normalizedPath = relativePath.replace(/\\/g, "/");
+      // Create relative import path from routes.ts location
+      const importPath = `./${normalizedPath}`;
 
       // Dynamic import - routes register themselves when imported
       return import(importPath);

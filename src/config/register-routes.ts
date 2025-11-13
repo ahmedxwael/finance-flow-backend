@@ -1,6 +1,6 @@
-import { router } from "@/core";
-import { importRoutes } from "@/routes";
 import { Express } from "express";
+import { router } from "../core";
+import { importRoutes } from "../routes";
 
 export async function registerRoutes(app: Express) {
   // Automatically import all routes.ts files from modules folder

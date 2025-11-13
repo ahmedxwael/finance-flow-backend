@@ -1,5 +1,5 @@
-import { __DEV__ } from "@/config/env";
-import { log, logError } from "@/shared/utils";
+import { __DEV__ } from "../config/env";
+import { log, logError } from "../shared/utils";
 import { NextFunction, Request, Response } from "express";
 
 export interface AppError extends Error {

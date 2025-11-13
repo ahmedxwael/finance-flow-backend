@@ -1,6 +1,6 @@
-import { SMTP_PASS, SMTP_USER } from "@/config/env";
-import { logError } from "@/shared/utils";
 import nodemailer from "nodemailer";
+import { SMTP_PASS, SMTP_USER } from "../config/env";
+import { logError } from "../shared/utils";
 import { SendEmailOptions } from "./types";
 
 export const transporter = nodemailer.createTransport({

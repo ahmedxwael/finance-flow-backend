@@ -1,5 +1,3 @@
-import { API_PREFIX } from "@/config/env";
-import { logRouteCompletion } from "@/shared/utils";
 import {
   Express,
   NextFunction,
@@ -7,6 +5,8 @@ import {
   RequestHandler,
   Response,
 } from "express";
+import { API_PREFIX } from "../config/env";
+import { logRouteCompletion } from "../shared/utils";
 
 export type RouteMethod = "get" | "post" | "put" | "patch" | "delete";
 

@@ -4,8 +4,8 @@ import {
   DATABASE_PASSWORD,
   DATABASE_PORT,
   DATABASE_USER,
-} from "@/config/env";
-import { log, logError } from "@/shared/utils";
+} from "../../config/env";
+import { log, logError } from "../../shared/utils";
 import { MongoClient } from "mongodb";
 import { Database, db } from "./db";
 

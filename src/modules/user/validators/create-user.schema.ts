@@ -1,4 +1,4 @@
-import { CURRENCIES } from "@/shared/consts";
+import { CURRENCIES } from "../../../shared/consts/currencies";
 import { z } from "zod";
 
 export const createUserSchema = z
