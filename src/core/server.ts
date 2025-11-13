@@ -10,7 +10,7 @@ import { log, logError } from "../shared/utils";
 export async function startServer(app: Express): Promise<void> {
   try {
     // Register routes (imports all routes.ts files from modules)
-    registerRoutes(app);
+    await registerRoutes(app);
 
     // Error handlers
     app.use(errorHandler);

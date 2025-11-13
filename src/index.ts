@@ -9,6 +9,9 @@ app.use(staticFiles()); // Serve static files from the 'public' directory
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-startApplication(app);
+startApplication(app).catch((error) => {
+  console.error("Failed to start application:", error);
+  process.exit(1);
+});
 
 export default app;

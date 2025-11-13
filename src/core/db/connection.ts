@@ -61,9 +61,19 @@ export class DBConnection {
    */
   public async connect(): Promise<Database> {
     try {
+      // Check if client exists and is still connected
       if (this.client && this.clientDb) {
-        log.info("Database already connected");
-        return this.clientDb;
+        try {
+          // Ping the database to check if connection is still alive
+          await this.client.db().admin().ping();
+          log.info("Database already connected");
+          return this.clientDb;
+        } catch {
+          // Connection is dead, reset it
+          log.warn("Database connection lost, reconnecting...");
+          this.client = null;
+          this.clientDb = null;
+        }
       }
 
       const { host, port, username, password, databaseName } = this.dbConfig;
@@ -85,10 +95,22 @@ export class DBConnection {
         throw new Error(errorMsg);
       }
 
-      // Connection options
+      // Connection options optimized for serverless environments
       // If using DATABASE_URL (production), it usually includes auth in the URL
       // If using host:port (development), we need to provide auth separately
-      const connectionOptions: any = {};
+      const connectionOptions: any = {
+        // Serverless-optimized connection options
+        serverSelectionTimeoutMS: 5000, // 5 seconds (reduced from default 30s)
+        connectTimeoutMS: 10000, // 10 seconds
+        socketTimeoutMS: 45000, // 45 seconds
+        // Connection pool settings for serverless
+        maxPoolSize: 10, // Maximum number of connections in the pool
+        minPoolSize: 1, // Minimum number of connections
+        maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
+        // Retry settings
+        retryWrites: true,
+        retryReads: true,
+      };
 
       // Only add auth if not using a full connection string (development mode)
       if (__DEV__ && username && password) {
@@ -97,6 +119,9 @@ export class DBConnection {
           password,
         };
       }
+
+      // Log connection attempt
+      log.info("Attempting to connect to database...");
 
       this.client = await MongoClient.connect(connectionUrl, connectionOptions);
 
@@ -113,7 +138,25 @@ export class DBConnection {
       }
 
       return this.clientDb;
-    } catch (error) {
+    } catch (error: any) {
+      // Provide more helpful error messages
+      if (
+        error.message?.includes("ECONNREFUSED") ||
+        error.message?.includes("timeout")
+      ) {
+        const errorMsg = `Database connection failed. Please check:
+1. DATABASE_URL is set correctly in environment variables
+2. MongoDB server is accessible from your network
+3. IP whitelist includes Vercel's IP ranges (if using MongoDB Atlas)
+4. Connection string format is correct`;
+
+        const connectionUrl = getDbUrl(this.dbConfig.host, this.dbConfig.port);
+
+        log.error(errorMsg, {
+          error: error.message,
+          connectionUrl: connectionUrl ? "***set***" : "not set",
+        });
+      }
       logError(error);
       throw error;
     }
