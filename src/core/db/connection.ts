@@ -1,16 +1,18 @@
 import { MongoClient } from "mongodb";
 import {
+  __DEV__,
   DATABASE_HOST,
   DATABASE_NAME,
   DATABASE_PASSWORD,
   DATABASE_PORT,
+  DATABASE_URL,
   DATABASE_USER,
 } from "../../config/env";
 import { log, logError } from "../../shared/utils";
 import { Database, db } from "./db";
 
 export function getDbUrl(host: string, port: string | number) {
-  return `mongodb://${host}:${port}`;
+  return __DEV__ ? `mongodb://${host}:${port}` : DATABASE_URL;
 }
 
 export class DBConnection {
