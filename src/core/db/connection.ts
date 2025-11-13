@@ -12,7 +12,12 @@ import { log, logError } from "../../shared/utils";
 import { Database, db } from "./db";
 
 export function getDbUrl(host: string, port: string | number) {
-  return __DEV__ ? `mongodb://${host}:${port}` : DATABASE_URL;
+  // In production, always use DATABASE_URL if available
+  if (!__DEV__ && DATABASE_URL) {
+    return DATABASE_URL;
+  }
+  // In development, use local connection
+  return `mongodb://${host}:${port}`;
 }
 
 export class DBConnection {
@@ -63,21 +68,54 @@ export class DBConnection {
 
       const { host, port, username, password, databaseName } = this.dbConfig;
 
-      this.client = await MongoClient.connect(getDbUrl(host, port), {
-        auth: {
+      // Get the connection URL
+      const connectionUrl = getDbUrl(host, port);
+
+      // Validate that we have a connection URL
+      if (!connectionUrl) {
+        const errorMsg = __DEV__
+          ? `Database connection URL is not set. Please set DATABASE_HOST and DATABASE_PORT environment variables.`
+          : `Database connection URL is not set. Please set DATABASE_URL environment variable for production.`;
+        log.error(errorMsg, {
+          __DEV__,
+          DATABASE_URL: DATABASE_URL ? "***set***" : "not set",
+          host,
+          port,
+        });
+        throw new Error(errorMsg);
+      }
+
+      // Log connection info (without sensitive data)
+      if (__DEV__) {
+        log.info(`Connecting to database at ${host}:${port}`);
+      } else {
+        log.info(`Connecting to database using DATABASE_URL`);
+      }
+
+      // Connection options
+      // If using DATABASE_URL (production), it usually includes auth in the URL
+      // If using host:port (development), we need to provide auth separately
+      const connectionOptions: any = {};
+
+      // Only add auth if not using a full connection string (development mode)
+      if (__DEV__ && username && password) {
+        connectionOptions.auth = {
           username,
           password,
-        },
-      });
+        };
+      }
+
+      this.client = await MongoClient.connect(connectionUrl, connectionOptions);
 
       // Set the database instance
+      // If DATABASE_URL includes the database name, use it, otherwise use DATABASE_NAME
       const mongoDBDatabase = this.client.db(databaseName);
       this.clientDb = db.setDatabase(mongoDBDatabase);
 
       log.info(`Database connected successfully. db: ${databaseName}`);
 
-      // Log a warning if the database connection is not secure
-      if (!username || !password) {
+      // Log a warning if the database connection is not secure (only in dev)
+      if (__DEV__ && (!username || !password)) {
         log.warn("You're not making a secure database connection!");
       }
 
