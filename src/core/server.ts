@@ -1,8 +1,8 @@
 import express from "express";
-import { PORT } from "src/config/env";
-import { registerRoutes } from "src/config/register-routes";
-import { errorHandler, notFoundHandler, staticFiles } from "src/middlewares";
-import { log, logError } from "src/shared/utils";
+import { PORT } from "../config/env";
+import { registerRoutes } from "../config/register-routes";
+import { errorHandler, notFoundHandler, staticFiles } from "../middlewares";
+import { log, logError } from "../shared/utils";
 
 export async function startServer(): Promise<void> {
   try {

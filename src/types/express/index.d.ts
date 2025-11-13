@@ -1,4 +1,4 @@
-import { User } from "src/modules/user/types";
+import { User } from "../../modules/user/types";
 
 declare global {
   namespace Express {

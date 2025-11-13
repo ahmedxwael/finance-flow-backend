@@ -1,4 +1,4 @@
-import { DateType } from "src/types";
+import { DateType } from "../../../types";
 
 export type User = {
   id: string;

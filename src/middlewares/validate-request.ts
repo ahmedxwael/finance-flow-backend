@@ -1,4 +1,4 @@
-import { formatZodErrors } from "src/shared/utils";
+import { formatZodErrors } from "../shared/utils";
 import { NextFunction, Request, Response } from "express";
 import { ZodObject } from "zod";
 

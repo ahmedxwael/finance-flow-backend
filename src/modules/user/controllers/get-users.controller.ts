@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { db } from "src/core";
+import { db } from "../../../core";
 
 export const getUsersController = async (req: Request, res: Response) => {
   const users = await db.collection("users").find().toArray();

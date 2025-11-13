@@ -1,4 +1,4 @@
-import { log, logError } from "src/shared/utils";
+import { log, logError } from "../shared/utils";
 import mongoose from "mongoose";
 import {
   __DEV__,
