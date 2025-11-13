@@ -17,7 +17,15 @@
     "isolatedModules": true,
     "noEmit": true,
     "types": ["node", "express"],
-    "typeRoots": ["./src/types", "./node_modules/@types"]
+    "typeRoots": ["./src/types", "./node_modules/@types"],
+    "baseUrl": "./",
+    "paths": {
+      "core/*": ["core/*"],
+      "modules/*": ["modules/*"],
+      "shared/*": ["shared/*"],
+      "types/*": ["types/*"]
+    }
   },
-  "include": ["src"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

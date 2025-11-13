@@ -3,16 +3,18 @@
   "builds": [
     {
       "src": "src/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["src/**"]
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/src/index.ts"
+      "dest": "src/index.ts"
     }
-  ]
+  ],
+  "functions": {
+    "src/index.ts": {
+      "runtime": "nodejs18.x"
+    }
+  }
 }

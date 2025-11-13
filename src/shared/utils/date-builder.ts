@@ -14,7 +14,6 @@ export const formatDate = (date: Date = new Date()) => {
     date,
     format: formattedDate,
     time,
-    // humanTime: "" // TODO
     fullDate: `${formattedDate} at ${time}`,
     timestamps: date.getTime(),
   };

@@ -1,6 +1,5 @@
 # node
 node_modules/
-package-lock.json
 
 
 # env files
@@ -10,6 +9,7 @@ package-lock.json
 # typescript
 *.tsbuildinfo
 .vercel
+dist/
 
 # uploads
 uploads/

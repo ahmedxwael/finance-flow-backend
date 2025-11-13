@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "start": "node dist/index.js",
+    "dev": "nodemon --exec \"ts-node -r tsconfig-paths/register\" src/index.ts",
     "build": "tsc && tsc-alias",
+    "start": "node dist/index.js",
+    "vercel-build": "yarn build",
     "format": "prettier --write \"src/**/*.{ts,tsx,json,md}\"",
     "lint": "eslint \"src/**/*.ts\""
   },
@@ -19,7 +20,7 @@
   "description": "Finance Flow Backend API",
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "config": "^4.1.1",
+    "chalk": "^4.1.2",
     "cors": "^2.8.5",
     "dayjs": "^1.11.19",
     "dotenv": "^17.2.3",
@@ -28,12 +29,11 @@
     "lodash": "^4.17.21",
     "mongodb": "^7.0.0",
     "mongoose": "^8.19.3",
+    "multer": "^1.4.5-lts.1",
     "nanoid": "^5.1.6",
     "nodemailer": "^7.0.6",
-    "zod": "^4.1.12",
     "tsconfig-paths": "^4.2.0",
-    "chalk": "^4.1.2",
-    "multer": "^1.4.5-lts.1"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -44,15 +44,15 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/lodash": "^4.17.20",
     "@types/mongoose": "^5.11.97",
+    "@types/multer": "^1.4.12",
     "@types/nanoid": "^3.0.0",
     "@types/node": "^24.3.0",
     "@types/nodemailer": "^7.0.1",
-    "@types/multer": "^1.4.12",
-    "nodemon": "^3.1.10",
+    "nodemon": "^3.1.11",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.2.0",
-    "ts-node-dev": "^2.0.0",
     "tsc-alias": "^1.8.16",
-    "typescript": "^5.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
