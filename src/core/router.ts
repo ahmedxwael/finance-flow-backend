@@ -5,8 +5,8 @@ import {
   RequestHandler,
   Response,
 } from "express";
-import { API_PREFIX } from "../config/env";
-import { logRouteCompletion } from "../shared/utils";
+import { API_PREFIX } from "src/config/env";
+import { logRouteCompletion } from "src/shared/utils";
 
 export type RouteMethod = "get" | "post" | "put" | "patch" | "delete";
 

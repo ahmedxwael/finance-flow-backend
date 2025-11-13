@@ -1,12 +1,12 @@
+import { MongoClient } from "mongodb";
 import {
   DATABASE_HOST,
   DATABASE_NAME,
   DATABASE_PASSWORD,
   DATABASE_PORT,
   DATABASE_USER,
-} from "../../config/env";
-import { log, logError } from "../../shared/utils";
-import { MongoClient } from "mongodb";
+} from "src/config/env";
+import { log, logError } from "src/shared/utils";
 import { Database, db } from "./db";
 
 export function getDbUrl(host: string, port: string | number) {

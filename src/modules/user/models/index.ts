@@ -1,4 +1,4 @@
-import { hashPassword, only, verifyPassword } from "../../../shared/utils";
+import { hashPassword, only, verifyPassword } from "src/shared/utils";
 import { Document, model, Schema } from "mongoose";
 import { User as UserType } from "../types";
 import { USER_PUBLIC_FIELDS } from "../utils/consts";

@@ -1,4 +1,4 @@
-import { GenericObject } from "../../types";
+import { GenericObject } from "src/types";
 
 export const validFields = <T extends GenericObject>(
   data: T,

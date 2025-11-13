@@ -49,10 +49,10 @@ export async function importRoutes() {
         routeFile.replace(/\.ts$/, "")
       );
 
-      // Convert Windows paths to forward slashes and create relative import path
+      // Convert Windows paths to forward slashes and use src/ prefix
       const normalizedPath = relativePath.replace(/\\/g, "/");
-      // Create relative import path from routes.ts location
-      const importPath = `./${normalizedPath}`;
+      // Use src/ prefix for cleaner imports (resolved by tsconfig-paths in dev, tsc-alias in build)
+      const importPath = `src/${normalizedPath}`;
 
       // Dynamic import - routes register themselves when imported
       return import(importPath);

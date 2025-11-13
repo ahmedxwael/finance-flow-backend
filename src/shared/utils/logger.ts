@@ -1,4 +1,4 @@
-import { __DEV__, LOG_LEVEL } from "../../config/env";
+import { __DEV__, LOG_LEVEL } from "src/config/env";
 import chalk from "chalk";
 import dayjs from "dayjs";
 import path from "path";
