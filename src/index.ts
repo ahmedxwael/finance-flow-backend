@@ -1,10 +1,10 @@
 import express from "express";
-import { startApplication } from "./core";
+import { setupAppInitialization } from "./core";
 
-// Create and configure Express app
+// Create Express app
 const app = express();
 
-// Start application
-startApplication(app);
+// Setup app initialization based on environment
+setupAppInitialization(app);
 
 export default app;

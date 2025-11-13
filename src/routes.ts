@@ -1,5 +1,6 @@
 import { readdir } from "fs/promises";
 import path from "path";
+import { log } from "./shared/utils";
 
 /**
  * Automatically imports all routes.ts files from the modules folder
@@ -9,59 +10,104 @@ export async function importRoutes() {
   try {
     // Get the src directory (works in both dev and production)
     // In dev: __dirname = src (when using ts-node-dev)
-    // In production: __dirname = dist (compiled)
-    const srcDir = __dirname.includes("dist")
-      ? path.join(__dirname, "..", "src")
-      : __dirname;
+    // In production/Vercel: __dirname might be dist or the compiled location
+    // Vercel with @vercel/node compiles on-the-fly, so we need to handle both cases
+    let srcDir = __dirname;
+
+    // If we're in a dist folder, go up to find src
+    if (__dirname.includes("dist")) {
+      srcDir = path.join(__dirname, "..", "src");
+    }
+
+    // If src doesn't exist, try the current directory (Vercel might use different structure)
+    try {
+      await readdir(srcDir);
+    } catch {
+      // If src doesn't exist, use current directory (for Vercel)
+      srcDir = __dirname;
+    }
+
     const modulesDir = path.join(srcDir, "modules");
 
-    // Recursively find all routes.ts files
-    const findRouteFiles = async (dir: string): Promise<string[]> => {
-      const files: string[] = [];
-      const entries = await readdir(dir, { withFileTypes: true });
-
-      for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name);
-
-        if (entry.isDirectory()) {
-          // Recursively search in subdirectories
-          const subFiles = await findRouteFiles(fullPath);
-          files.push(...subFiles);
-        } else if (entry.isFile() && entry.name === "routes.ts") {
-          // Found a routes.ts file
-          files.push(fullPath);
-        }
-      }
-
-      return files;
-    };
-
-    const routeFiles = await findRouteFiles(modulesDir);
-
-    // Import all route files in parallel for better performance
-    // This is much faster than sequential imports, especially as routes grow
-    // All imports happen concurrently, reducing total load time
-    const importPromises = routeFiles.map((routeFile) => {
-      // Convert absolute path to relative path from src directory
-      // e.g., D:\...\src\modules\user\routes.ts -> modules/user/routes
-      const relativePath = path.relative(
-        srcDir,
-        routeFile.replace(/\.ts$/, "")
+    // Check if modules directory exists
+    try {
+      await readdir(modulesDir);
+    } catch (error) {
+      log.warn(
+        `Modules directory not found at ${modulesDir}, trying alternative paths...`
       );
+      // Try alternative: maybe we're already in src
+      const altModulesDir = path.join(process.cwd(), "src", "modules");
+      try {
+        await readdir(altModulesDir);
+        log.info(`Found modules at ${altModulesDir}`);
+        return await importRoutesFromDir(
+          altModulesDir,
+          path.join(process.cwd(), "src")
+        );
+      } catch {
+        throw new Error(
+          `Could not find modules directory. Tried: ${modulesDir}, ${altModulesDir}`
+        );
+      }
+    }
 
-      // Convert Windows paths to forward slashes and create relative import path
-      const normalizedPath = relativePath.replace(/\\/g, "/");
-      // Create relative import path from routes.ts location
-      const importPath = `./${normalizedPath}`;
-
-      // Dynamic import - routes register themselves when imported
-      return import(importPath);
-    });
-
-    // Wait for all routes to be imported in parallel
-    await Promise.all(importPromises);
+    return await importRoutesFromDir(modulesDir, srcDir);
   } catch (error) {
-    console.error("Error importing routes:", error);
+    log.error("Error importing routes:", error);
     throw error;
   }
+}
+
+async function importRoutesFromDir(
+  modulesDir: string,
+  srcDir: string
+): Promise<void> {
+  // Recursively find all routes.ts files
+  const findRouteFiles = async (dir: string): Promise<string[]> => {
+    const files: string[] = [];
+    const entries = await readdir(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        const subFiles = await findRouteFiles(fullPath);
+        files.push(...subFiles);
+      } else if (
+        entry.isFile() &&
+        (entry.name === "routes.ts" || entry.name === "routes.js")
+      ) {
+        files.push(fullPath);
+      }
+    }
+
+    return files;
+  };
+
+  const routeFiles = await findRouteFiles(modulesDir);
+  log.info(`Found ${routeFiles.length} route file(s) to import`);
+
+  // Import all route files in parallel
+  const importPromises = routeFiles.map(async (routeFile) => {
+    try {
+      // Convert absolute path to relative path from src directory
+      const relativePath = path.relative(
+        srcDir,
+        routeFile.replace(/\.(ts|js)$/, "")
+      );
+
+      // Convert Windows paths to forward slashes
+      const normalizedPath = relativePath.replace(/\\/g, "/");
+      const importPath = `./${normalizedPath}`;
+
+      await import(importPath);
+      log.debug(`Imported routes from ${importPath}`);
+    } catch (error) {
+      log.error(`Failed to import route file ${routeFile}:`, error);
+      throw error;
+    }
+  });
+
+  await Promise.all(importPromises);
 }

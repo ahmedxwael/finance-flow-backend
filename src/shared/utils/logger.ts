@@ -1,7 +1,7 @@
-import { __DEV__, LOG_LEVEL } from "../../config/env";
 import chalk from "chalk";
 import dayjs from "dayjs";
 import path from "path";
+import { __DEV__, LOG_LEVEL } from "../../config/env";
 
 // Determine log level from environment or default to 'info'
 const logLevel = LOG_LEVEL || (__DEV__ ? "debug" : "info");
@@ -82,7 +82,7 @@ const symbols = {
   error: "❌ ",
   warn: "⚠️ ",
   info: "ℹ️ ",
-  debug: "🔍 ",
+  debug: "🔍",
   success: "✅",
   trace: "↗️ ",
 };
