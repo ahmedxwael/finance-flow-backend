@@ -7,9 +7,13 @@
  */
 import path from "path";
 
+// Get the directory where this file is located
 const currentDir = __dirname;
 
 // Determine the src directory based on the current location
+// In Vercel: /var/task/src/setup/paths.js -> srcDir = /var/task/src
+// In local build: dist/setup/paths.js -> srcDir = src (relative to dist)
+// In development: src/setup/paths.ts -> srcDir = src
 let srcDir: string;
 if (currentDir.includes("var/task")) {
   // Vercel production: /var/task/src/setup/paths.js -> /var/task/src
@@ -21,6 +25,9 @@ if (currentDir.includes("var/task")) {
   // Development: src/setup/paths.ts -> src
   srcDir = path.resolve(currentDir, "..");
 }
+
+// Normalize the path to handle any inconsistencies
+srcDir = path.normalize(srcDir);
 
 const Module = require("module");
 const originalResolveFilename = Module._resolveFilename;
@@ -34,10 +41,11 @@ Module._resolveFilename = function (
   // Only handle src/ prefixed imports
   if (request.startsWith("src/")) {
     const relativePath = request.replace(/^src\//, "");
+    // Resolve to absolute path: src/config/env -> /var/task/src/config/env
     const resolvedPath = path.resolve(srcDir, relativePath);
 
+    // Let Node's resolver handle the path resolution (it knows about .js extensions, index files, etc.)
     try {
-      // Try to resolve the path directly
       return originalResolveFilename.call(
         this,
         resolvedPath,
@@ -46,19 +54,13 @@ Module._resolveFilename = function (
         options
       );
     } catch (err: any) {
-      // If direct resolution fails, try with .js extension
-      try {
-        return originalResolveFilename.call(
-          this,
-          resolvedPath + ".js",
-          parent,
-          isMain,
-          options
-        );
-      } catch {
-        // If that also fails, throw the original error
-        throw err;
-      }
+      // If resolution fails, provide a helpful error message
+      throw new Error(
+        `Cannot resolve module '${request}' from '${parent?.filename || "unknown"}'. ` +
+          `Resolved to: ${resolvedPath}. ` +
+          `Source directory: ${srcDir}. ` +
+          `Original error: ${err.message}`
+      );
     }
   }
 
