@@ -100,16 +100,19 @@ export class DBConnection {
       // If using host:port (development), we need to provide auth separately
       const connectionOptions: any = {
         // Serverless-optimized connection options
-        serverSelectionTimeoutMS: 5000, // 5 seconds (reduced from default 30s)
-        connectTimeoutMS: 10000, // 10 seconds
+        // Increased timeouts for serverless environments where network latency can be higher
+        serverSelectionTimeoutMS: 30000, // 30 seconds (increased for serverless)
+        connectTimeoutMS: 30000, // 30 seconds (increased for serverless)
         socketTimeoutMS: 45000, // 45 seconds
         // Connection pool settings for serverless
         maxPoolSize: 10, // Maximum number of connections in the pool
-        minPoolSize: 1, // Minimum number of connections
+        minPoolSize: 0, // Allow pool to shrink to 0 for serverless (connections close after inactivity)
         maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
         // Retry settings
         retryWrites: true,
         retryReads: true,
+        // Heartbeat settings to keep connection alive
+        heartbeatFrequencyMS: 10000, // Send heartbeat every 10 seconds
       };
 
       // Only add auth if not using a full connection string (development mode)
@@ -120,8 +123,16 @@ export class DBConnection {
         };
       }
 
-      // Log connection attempt
-      log.info("Attempting to connect to database...");
+      // Log connection attempt with sanitized URL (hide credentials)
+      const sanitizedUrl = connectionUrl.replace(
+        /\/\/([^:]+):([^@]+)@/,
+        "//***:***@"
+      );
+      log.info("Attempting to connect to database...", {
+        environment: __DEV__ ? "development" : "production",
+        url: sanitizedUrl,
+        timeout: `${connectionOptions.serverSelectionTimeoutMS}ms`,
+      });
 
       this.client = await MongoClient.connect(connectionUrl, connectionOptions);
 
@@ -142,19 +153,27 @@ export class DBConnection {
       // Provide more helpful error messages
       if (
         error.message?.includes("ECONNREFUSED") ||
-        error.message?.includes("timeout")
+        error.message?.includes("timeout") ||
+        error.message?.includes("Server selection timed out")
       ) {
+        const connectionUrl = getDbUrl(this.dbConfig.host, this.dbConfig.port);
+        const sanitizedUrl =
+          connectionUrl?.replace(/\/\/([^:]+):([^@]+)@/, "//***:***@") ||
+          "not set";
+
         const errorMsg = `Database connection failed. Please check:
 1. DATABASE_URL is set correctly in environment variables
 2. MongoDB server is accessible from your network
-3. IP whitelist includes Vercel's IP ranges (if using MongoDB Atlas)
-4. Connection string format is correct`;
-
-        const connectionUrl = getDbUrl(this.dbConfig.host, this.dbConfig.port);
+3. IP whitelist includes Vercel's IP ranges (if using MongoDB Atlas) - allow 0.0.0.0/0 for serverless
+4. Connection string format is correct (should include auth if required)
+5. Network connectivity and firewall settings
+6. MongoDB service is running and accessible`;
 
         log.error(errorMsg, {
           error: error.message,
-          connectionUrl: connectionUrl ? "***set***" : "not set",
+          connectionUrl: sanitizedUrl,
+          environment: __DEV__ ? "development" : "production",
+          hasDatabaseUrl: !!DATABASE_URL,
         });
       }
       logError(error);
