@@ -1,51 +1,21 @@
-import express, { Express } from "express";
+import { Express } from "express";
+import { registerRoutes } from "../config";
 import { PORT } from "../config/env";
-import { registerRoutes } from "../config/register-routes";
-import { errorHandler, notFoundHandler, staticFiles } from "../middlewares";
+import { errorHandler, notFoundHandler } from "../middlewares";
 import { log, logError } from "../shared/utils";
 
-let appInstance: Express | null = null;
-
 /**
- * Create and configure the Express app
- * This function can be called multiple times but will return the same instance
+ * Start the server (for local development)
  */
-export async function createApp(): Promise<Express> {
-  if (appInstance) {
-    return appInstance;
-  }
-
+export async function startServer(app: Express): Promise<void> {
   try {
-    const app = express();
-
-    // Middlewares
-    app.use(staticFiles()); // Serve static files from the 'public' directory
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
-
     // Register routes (imports all routes.ts files from modules)
-    await registerRoutes(app);
+    registerRoutes(app);
 
     // Error handlers
     app.use(errorHandler);
     app.use(notFoundHandler);
 
-    appInstance = app;
-    return app;
-  } catch (error) {
-    logError(error);
-    throw error;
-  }
-}
-
-/**
- * Start the server (for local development)
- */
-export async function startServer(): Promise<void> {
-  try {
-    const app = await createApp();
-
-    // Start server
     app.listen(PORT, () => {
       log.info(`Server is running on port http://localhost:${PORT}`);
     });

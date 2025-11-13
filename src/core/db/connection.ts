@@ -85,13 +85,6 @@ export class DBConnection {
         throw new Error(errorMsg);
       }
 
-      // Log connection info (without sensitive data)
-      if (__DEV__) {
-        log.info(`Connecting to database at ${host}:${port}`);
-      } else {
-        log.info(`Connecting to database using DATABASE_URL`);
-      }
-
       // Connection options
       // If using DATABASE_URL (production), it usually includes auth in the URL
       // If using host:port (development), we need to provide auth separately
