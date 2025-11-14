@@ -8,7 +8,7 @@ import { __DEV__ } from "../config/env";
  * @returns Express middleware
  */
 export const staticFiles = (publicPath: string = "public") => {
-  const staticPath = path.join(__dirname, publicPath);
+  const staticPath = path.join(__dirname, "..", publicPath);
 
   return express.static(staticPath, {
     // Options for static file serving
