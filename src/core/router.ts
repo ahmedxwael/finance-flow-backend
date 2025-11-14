@@ -133,20 +133,6 @@ export class Router {
   }
 
   /**
-   * @description Set the Express app for immediate route registration
-   * @param app - The Express app instance
-   */
-  public setApp(app: Express): void {
-    this.app = app;
-    // Register any routes that were added before the app was set
-    this.routes.forEach((route) => {
-      if (!route.registered) {
-        this.registerRoute(route);
-      }
-    });
-  }
-
-  /**
    * @description Create a logging wrapper for a route handler
    * @param route - The route to create a wrapper for
    * @returns A wrapped handler with logging
@@ -271,6 +257,20 @@ export class Router {
    */
   public route(path: string): RouteBuilder {
     return new RouteBuilder(path, this);
+  }
+
+  /**
+   * @description Set the Express app for immediate route registration
+   * @param app - The Express app instance
+   */
+  public scan(app: Express): void {
+    this.app = app;
+    // Register any routes that were added before the app was set
+    this.routes.forEach((route) => {
+      if (!route.registered) {
+        this.registerRoute(route);
+      }
+    });
   }
 
   /**
