@@ -6,7 +6,7 @@ import {
   Response,
 } from "express";
 import { API_PREFIX } from "../config/env";
-import { logRouteCompletion } from "../shared/utils";
+import { log, logRouteCompletion } from "../shared/utils";
 
 export type RouteMethod = "get" | "post" | "put" | "patch" | "delete";
 
@@ -14,6 +14,7 @@ export type Route = {
   path: string;
   method: RouteMethod;
   handler: RequestHandler;
+  registered?: boolean;
 };
 
 /**
@@ -118,6 +119,7 @@ export class Router {
   private static instance: Router;
   private routes: Route[] = [];
   private prefix: string = `/${API_PREFIX || ""}`;
+  private app: Express | null = null;
 
   private constructor(prefix: string = "") {
     this.prefix += prefix;
@@ -131,17 +133,77 @@ export class Router {
   }
 
   /**
+   * @description Set the Express app for immediate route registration
+   * @param app - The Express app instance
+   */
+  public setApp(app: Express): void {
+    this.app = app;
+    // Register any routes that were added before the app was set
+    this.routes.forEach((route) => {
+      if (!route.registered) {
+        this.registerRoute(route);
+      }
+    });
+  }
+
+  /**
+   * @description Create a logging wrapper for a route handler
+   * @param route - The route to create a wrapper for
+   * @returns A wrapped handler with logging
+   */
+  private createLoggingHandler(route: Route): RequestHandler {
+    return (req: Request, res: Response, next: NextFunction): void => {
+      const startTime = Date.now();
+      const fullPath = `${this.prefix}${route.path}`;
+
+      // Track when response finishes to get actual status code
+      res.once("finish", () => {
+        const duration = Date.now() - startTime;
+        const statusCode = res.statusCode;
+
+        logRouteCompletion(route.method, fullPath, statusCode, duration);
+      });
+
+      // Call the original handler
+      route.handler(req, res, next);
+    };
+  }
+
+  /**
+   * @description Register a single route with Express
+   * @param route - The route to register
+   */
+  private registerRoute(route: Route): void {
+    if (!this.app) {
+      log.error("App not set yet, will register later");
+      return; // App not set yet, will register later
+    }
+
+    const wrappedHandler = this.createLoggingHandler(route);
+    this.app[route.method](`${this.prefix}${route.path}`, wrappedHandler);
+    route.registered = true;
+  }
+
+  /**
    * @description Internal method to add a route
    * @param method - The HTTP method
    * @param path - The path of the route
    * @param handler - The handler function
    */
   public addRoute(method: RouteMethod, path: string, handler: RequestHandler) {
-    this.routes.push({
+    const route: Route = {
       path,
       method,
       handler,
-    });
+      registered: false,
+    };
+
+    this.routes.push(route);
+
+    // Register immediately if app is already set
+    if (this.app) {
+      this.registerRoute(route);
+    }
   }
 
   /**
@@ -209,42 +271,6 @@ export class Router {
    */
   public route(path: string): RouteBuilder {
     return new RouteBuilder(path, this);
-  }
-
-  /**
-   * @description Scan the routes and add them to the express app
-   * @param app - The express app
-   * @param options - The options for the route
-   * @returns The router instance
-   */
-  public scan(app: Express) {
-    this.routes.forEach((route) => {
-      const handler = (
-        req: Request,
-        res: Response,
-        next: NextFunction
-      ): void => {
-        const startTime = Date.now();
-
-        // Track when response finishes to get actual status code
-        res.once("finish", () => {
-          const duration = Date.now() - startTime;
-          const statusCode = res.statusCode;
-
-          logRouteCompletion(
-            route.method,
-            `${this.prefix}${route.path}`,
-            statusCode,
-            duration
-          );
-        });
-
-        // Call the original handler
-        route.handler(req, res, next);
-      };
-
-      app[route.method](`${this.prefix}${route.path}`, handler);
-    });
   }
 
   /**

@@ -14,7 +14,7 @@ export async function registerRoutes(app: Express) {
     });
 
     // Scan the routes and register them with Express
-    router.scan(app);
+    router.setApp(app);
 
     const routes = router.getRoutes();
     log.info(`Registered ${routes.length} route(s)`);
