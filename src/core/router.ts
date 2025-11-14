@@ -7,6 +7,7 @@ import {
 } from "express";
 import { API_PREFIX } from "../config/env";
 import { log, logRouteCompletion } from "../shared/utils";
+import { http } from "./http";
 
 export type RouteMethod = "get" | "post" | "put" | "patch" | "delete";
 
@@ -138,7 +139,7 @@ export class Router {
    * @returns A wrapped handler with logging
    */
   private createLoggingHandler(route: Route): RequestHandler {
-    return (req: Request, res: Response, next: NextFunction): void => {
+    return (req: Request, res: Response, next: NextFunction): Promise<any> => {
       const startTime = Date.now();
       const fullPath = `${this.prefix}${route.path}`;
 
@@ -150,8 +151,13 @@ export class Router {
         logRouteCompletion(route.method, fullPath, statusCode, duration);
       });
 
-      // Call the original handler
-      route.handler(req, res, next);
+      http
+        .setRequest(req)
+        .setResponse(res)
+        .setNext(next)
+        .setHandler(route.handler);
+
+      return http.execute();
     };
   }
 
