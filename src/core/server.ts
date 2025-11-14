@@ -1,4 +1,6 @@
 import express, { Express } from "express";
+import path from "path";
+import favicon from "serve-favicon";
 import { registerRoutes } from "../config";
 import { PORT, __DEV__ } from "../config/env";
 import { errorHandler, notFoundHandler, staticFiles } from "../middlewares";
@@ -9,6 +11,7 @@ import { log, logError } from "../shared/utils";
  */
 function setupMiddlewares(app: Express): void {
   app.use(staticFiles());
+  app.use(favicon(path.join(__dirname, "..", "public", "favicon.ico")));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 }

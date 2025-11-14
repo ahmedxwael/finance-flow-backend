@@ -24,5 +24,13 @@ export function getConnectionOptions(
     };
   }
 
+  // Add timeout options to fail faster when server is unavailable
+  // In development, use shorter timeouts for faster feedback
+  if (__DEV__) {
+    connectionOptions.serverSelectionTimeoutMS = 5000; // 5 seconds
+    connectionOptions.connectTimeoutMS = 5000; // 5 seconds
+    connectionOptions.socketTimeoutMS = 5000; // 5 seconds
+  }
+
   return connectionOptions;
 }

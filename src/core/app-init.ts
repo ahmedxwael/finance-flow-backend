@@ -19,9 +19,10 @@ let initState: InitState = {
  * Handle initialization errors based on environment
  */
 function handleInitError(error: unknown): void {
-  logError(error);
   if (__DEV__) {
-    process.exit(1);
+    setTimeout(() => {
+      process.exit(1);
+    }, 100);
   } else {
     console.error("Failed to initialize application:", error);
   }
@@ -73,13 +74,8 @@ export async function initializeApp(app: Express): Promise<void> {
  * Start the application (for local development)
  */
 export async function startApplication(app: Express): Promise<void> {
-  try {
-    await connectToDB();
-    await startServer(app);
-  } catch (error) {
-    logError(error);
-    process.exit(1);
-  }
+  await connectToDB();
+  await startServer(app);
 }
 
 /**
