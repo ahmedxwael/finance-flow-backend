@@ -118,5 +118,3 @@ async function importRoutesFromDir(
 
   await Promise.all(importPromises);
 }
-
-console.log("test");
