@@ -5,10 +5,13 @@ import { getBaseDirectory } from "./serverless";
 /**
  * Ensure uploads directory exists
  * In serverless environments, uses /tmp directory
+ * Handles both absolute and relative paths
  */
 export const ensureDirectory = (directory: string) => {
-  const baseDir = getBaseDirectory();
-  const fullPath = path.join(baseDir, directory);
+  // If directory is already an absolute path, use it directly
+  const fullPath = path.isAbsolute(directory)
+    ? directory
+    : path.join(getBaseDirectory(), directory);
 
   if (!existsSync(fullPath)) {
     mkdirSync(fullPath, { recursive: true });
