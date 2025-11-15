@@ -3,6 +3,7 @@ import { existsSync, readdirSync, rmdirSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
 import { http } from "../../../core";
+import { getBaseDirectory } from "../../../shared/utils";
 import { UPLOADS_DIR_NAME } from "../utils";
 
 interface FileToDelete {
@@ -45,19 +46,21 @@ const buildResponse = (total: number, failedFiles: DeleteResult[]) => {
 /**
  * Remove a single file specified by filename and fieldname.
  * Throws an error if the file does not exist or cannot be removed.
+ * Uses the same path logic as uploads to support serverless environments.
  */
 const findAndDeleteFile = async (
   filename: string,
   fieldname: string
 ): Promise<void> => {
-  const filePath = path.resolve(UPLOADS_DIR_NAME, fieldname, filename);
+  const baseDir = getBaseDirectory();
+  const filePath = path.join(baseDir, UPLOADS_DIR_NAME, fieldname, filename);
 
   if (!existsSync(filePath)) {
     throw new Error(`File "${filename}" not found in folder "${fieldname}"`);
   }
 
   try {
-    const dirPath = path.resolve(UPLOADS_DIR_NAME, fieldname);
+    const dirPath = path.join(baseDir, UPLOADS_DIR_NAME, fieldname);
 
     // Delete the file
     await fs.unlink(filePath);
