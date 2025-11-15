@@ -4,12 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 import { http } from "../../../core";
 import { getBaseDirectory, validateFilePath } from "../../../shared/utils";
-import { UPLOADS_DIR_NAME } from "../utils";
-
-interface FileToDelete {
-  filename: string;
-  fieldname: string;
-}
+import { UPLOADS_FIELDNAME } from "../utils";
 
 interface DeleteResult {
   filename: string;
@@ -45,36 +40,35 @@ const buildResponse = (total: number, failedFiles: DeleteResult[]) => {
 
 /**
  * Remove a single file specified by filename and fieldname.
+ * Validates fieldname is "uploads" and always uses "uploads" for the path.
  * Throws an error if the file does not exist or cannot be removed.
  * Uses the same path logic as uploads to support serverless environments.
  */
-const findAndDeleteFile = async (
-  filename: string,
-  fieldname: string
-): Promise<void> => {
+const findAndDeleteFile = async (filename: string): Promise<void> => {
   const baseDir = getBaseDirectory();
-  const filePath = path.join(baseDir, UPLOADS_DIR_NAME, fieldname, filename);
+  // Files are stored directly in uploads/ (not uploads/uploads/)
+  const filePath = path.join(baseDir, UPLOADS_FIELDNAME, filename);
 
   // Security: Prevent directory traversal attacks
   validateFilePath(filePath);
 
   if (!existsSync(filePath)) {
-    throw new Error(`File "${filename}" not found in folder "${fieldname}"`);
+    throw new Error(`File "${filename}" not found`);
   }
 
   try {
-    const dirPath = path.join(baseDir, UPLOADS_DIR_NAME, fieldname);
-
     // Delete the file
     await fs.unlink(filePath);
 
+    const dirPath = path.join(baseDir, UPLOADS_FIELDNAME);
+    const hasFiles = readdirSync(dirPath).length > 0;
     // Delete the directory if it is empty
-    if (readdirSync(dirPath).length === 0) {
+    if (!hasFiles) {
       rmdirSync(dirPath);
     }
   } catch (err: any) {
     throw new Error(
-      `Failed to remove file "${filename}" from "${fieldname}": ${err.message || err}`
+      `Failed to remove file "${filename}": ${err.message || err}`
     );
   }
 };
@@ -82,13 +76,9 @@ const findAndDeleteFile = async (
 /**
  * Process file deletion and return result
  */
-const processFileDeletion = async (
-  file: FileToDelete
-): Promise<DeleteResult> => {
-  const { filename, fieldname } = file;
-
+const processFileDeletion = async (filename: string): Promise<DeleteResult> => {
   try {
-    await findAndDeleteFile(filename, fieldname);
+    await findAndDeleteFile(filename);
     return { filename, success: true };
   } catch (error: any) {
     return {
@@ -106,20 +96,20 @@ const processFileDeletion = async (
  * @returns The response object
  *
  * Accepts:
- * - Body: { files: [{ filename: "abc.jpg", fieldname: "images" }] }
+ * - Body: { files: ["abc.jpg", "def.png"] }
+ * Note: fieldname must be "uploads"
  */
 export const removeFilesController = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
   try {
-    const files = http.input<FileToDelete[]>("files", []);
+    const files = http.input<string[]>("files", []);
 
     if (files.length === 0) {
       return res.status(400).json({
         success: false,
-        message:
-          "No files provided. Use 'files' as an array of objects with filename and fieldname.",
+        message: "No files provided. Use 'files' as an array of filenames.",
         user: http.user,
       });
     }

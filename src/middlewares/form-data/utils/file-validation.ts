@@ -44,6 +44,15 @@ export const createFileFilter = (config: FileValidationOptions) => {
     file: Express.Multer.File,
     cb: multer.FileFilterCallback
   ) => {
+    // Validate fieldname is "uploads"
+    if (file.fieldname !== "uploads") {
+      return cb(
+        new Error(
+          `Invalid fieldname: "${file.fieldname}". Fieldname must be "uploads"`
+        )
+      );
+    }
+
     // Validate MIME type using Zod
     const mimeResult = fileMimeTypeSchema.safeParse(file.mimetype);
 

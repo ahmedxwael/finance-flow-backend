@@ -2,7 +2,7 @@ import { Request } from "express";
 import { writeFileSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
-import { UPLOADS_DIR_NAME } from "../modules/file-uploads/utils";
+import { UPLOADS_FIELDNAME } from "../modules/file-uploads/utils";
 import { ensureDirectory } from "../shared/utils";
 import { GenericObject } from "../types";
 
@@ -16,7 +16,7 @@ export interface UploadedFileInterface {
 }
 
 export class UploadedFile {
-  private readonly rootPath: string = UPLOADS_DIR_NAME;
+  private readonly rootPath: string = UPLOADS_FIELDNAME;
 
   constructor(private readonly file: Express.Multer.File) {
     this.validateFile(file);
@@ -51,12 +51,10 @@ export class UploadedFile {
    */
   public getFileUrl(req: Request): string {
     // Try to get a base path, fallback to '/uploads'
-    const uploadsBaseUrl = `/${UPLOADS_DIR_NAME}`;
+    const uploadsBaseUrl = `/${UPLOADS_FIELDNAME}`;
 
-    // Prefer the file fieldname and filename for unique path
-    const segments = [uploadsBaseUrl, this.file.fieldname, this.name()].filter(
-      Boolean
-    );
+    // Files are stored directly in uploads/ (fieldname is validated but not used in path)
+    const segments = [uploadsBaseUrl, this.name()].filter(Boolean);
 
     // Use POSIX path joining to avoid backslashes on Windows URLs
     const resourcePath = path.posix.join(...segments);
@@ -187,7 +185,7 @@ export class UploadedFile {
     filename: string,
     subdirectory?: string
   ): Promise<void> {
-    const rootPath = ensureDirectory(UPLOADS_DIR_NAME);
+    const rootPath = ensureDirectory(UPLOADS_FIELDNAME);
     const filePath = subdirectory
       ? path.join(rootPath, subdirectory, filename)
       : path.join(rootPath, filename);

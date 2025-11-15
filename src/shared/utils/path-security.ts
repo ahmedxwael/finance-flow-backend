@@ -1,5 +1,5 @@
 import path from "path";
-import { UPLOADS_DIR_NAME } from "../../modules/file-uploads/utils";
+import { UPLOADS_FIELDNAME } from "../../modules/file-uploads/utils";
 import { getBaseDirectory } from "./serverless";
 
 /**
@@ -8,7 +8,7 @@ import { getBaseDirectory } from "./serverless";
  */
 export const getAllowedUploadsPath = (): string => {
   const baseDir = getBaseDirectory();
-  return path.resolve(baseDir, UPLOADS_DIR_NAME);
+  return path.resolve(baseDir, UPLOADS_FIELDNAME);
 };
 
 /**
