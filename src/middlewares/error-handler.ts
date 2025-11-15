@@ -1,6 +1,7 @@
+import { NextFunction, Request, Response } from "express";
+import multer from "multer";
 import { __DEV__ } from "../config/env";
 import { log, logError } from "../shared/utils";
-import { NextFunction, Request, Response } from "express";
 
 export interface AppError extends Error {
   statusCode?: number;
@@ -8,13 +9,63 @@ export interface AppError extends Error {
 }
 
 export const errorHandler = (
-  error: AppError,
+  error: AppError | multer.MulterError,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const statusCode = error.statusCode || 500;
-  const isOperational = error.isOperational || false;
+  // Handle Multer errors specifically
+  if (error instanceof multer.MulterError) {
+    let statusCode = 400;
+    let message = error.message;
+
+    switch (error.code) {
+      case "LIMIT_FILE_SIZE":
+        message = "File too large";
+        statusCode = 413;
+        break;
+      case "LIMIT_FILE_COUNT":
+        message = "Too many files";
+        statusCode = 400;
+        break;
+      case "LIMIT_UNEXPECTED_FILE":
+        message =
+          "Unexpected file field. The file field name doesn't match the expected field name.";
+        statusCode = 400;
+        // Add helpful hint about field names
+        if (req.route && req.route.path) {
+          message += ` Make sure your form field name matches what the server expects (usually "file").`;
+        }
+        break;
+      case "LIMIT_PART_COUNT":
+        message = "Too many parts";
+        statusCode = 400;
+        break;
+      default:
+        message = error.message || "File upload error";
+    }
+
+    logError(error, {
+      method: req.method,
+      url: req.url,
+      statusCode,
+      isOperational: true,
+      ip: req.ip,
+      userAgent: req.headers["user-agent"],
+    });
+
+    return res.status(statusCode).json({
+      error: {
+        message,
+        statusCode,
+        code: error.code,
+      },
+    });
+  }
+
+  // Handle other errors
+  const statusCode = (error as AppError).statusCode || 500;
+  const isOperational = (error as AppError).isOperational || false;
 
   // Log error with context
   logError(error, {

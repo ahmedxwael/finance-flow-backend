@@ -79,7 +79,7 @@ const colors = {
 
 // Symbol mappings for log levels
 const symbols = {
-  error: "❌ ",
+  error: "❌",
   warn: "⚠️ ",
   info: "ℹ️ ",
   debug: "🔍",
@@ -140,20 +140,21 @@ const formatMessage = (
 
   // Only show context if there's actual data
   const hasContext = Object.keys(mergedContext).length > 0;
+
   if (hasContext) {
     // If data was a simple object, merge it; otherwise show separately
     if (data && typeof data === "object" && !Array.isArray(data)) {
-      formattedMessage += `\n${chalk.grey(JSON.stringify(mergedContext, null, 2))}`;
+      formattedMessage += `\n${colors[level](JSON.stringify(mergedContext, null, 2))}`;
     } else if (data) {
-      formattedMessage += ` ${chalk.grey(String(data))}`;
+      formattedMessage += ` ${colors[level](String(data))}`;
       if (Object.keys(mergedContext).length > 0) {
-        formattedMessage += `\n${chalk.grey(JSON.stringify(mergedContext, null, 2))}`;
+        formattedMessage += `\n${colors[level](JSON.stringify(mergedContext, null, 2))}`;
       }
     } else {
-      formattedMessage += `\n${chalk.grey(JSON.stringify(mergedContext, null, 2))}`;
+      formattedMessage += `\n${colors[level](JSON.stringify(mergedContext, null, 2))}`;
     }
   } else if (data && typeof data !== "object") {
-    formattedMessage += ` ${chalk.grey(String(data))}`;
+    formattedMessage += ` ${colors[level](String(data))}`;
   }
 
   return formattedMessage;

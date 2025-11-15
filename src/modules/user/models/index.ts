@@ -1,5 +1,5 @@
-import { hashPassword, only, verifyPassword } from "../../../shared/utils";
 import { Document, model, Schema } from "mongoose";
+import { hashString, only, verifyHashedString } from "../../../shared/utils";
 import { User as UserType } from "../types";
 import { USER_PUBLIC_FIELDS } from "../utils/consts";
 
@@ -72,14 +72,14 @@ userSchema.pre("save", async function (next) {
     return next();
   }
 
-  user.password = await hashPassword(user.password);
+  user.password = await hashString(user.password);
   next();
 });
 
 userSchema.methods.comparePassword = async function (password: string) {
   const user = this as unknown as UserType & Document;
 
-  return await verifyPassword(password, user.password).catch(() => false);
+  return await verifyHashedString(password, user.password).catch(() => false);
 };
 
 const formatUser = (user: UserType & Document) => {

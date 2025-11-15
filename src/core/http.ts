@@ -1,11 +1,14 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
+import { User } from "../modules/user/types";
 import { GenericObject } from "../types";
+import { UploadedFile } from "./uploaded-file";
 
 export class Http {
   public request: Request | any = null;
   public response: Response | any = null;
   public next: NextFunction | any = null;
   public handler: RequestHandler | any = null;
+  public user: User | null = null;
 
   /**
    * @description Validate the properties of the Http class
@@ -70,6 +73,16 @@ export class Http {
     this.validateProperties();
 
     return await this.handler(this.request, this.response, this.next);
+  }
+
+  /**
+   * @description Set the user of the Http class
+   * @param user - The user to set
+   * @returns The Http class
+   */
+  public setUser(user: User) {
+    this.user = user;
+    return this;
   }
 
   /**
@@ -139,14 +152,16 @@ export class Http {
    * @param fallback - The fallback value if the input is not found
    * @returns The value of the given key from the request body, params or query
    */
-  public input(key: string, fallback?: any): any | undefined {
+  public input<T = any>(key: string): T | undefined;
+  public input<T = any>(key: string, fallback: T): T;
+  public input<T>(key: string, fallback?: T): T | undefined {
     this.validateProperties(["request"]);
 
     return (
       this.request.body[key] ||
       this.request.params[key] ||
       this.request.query[key] ||
-      fallback
+      (fallback as T)
     );
   }
 
@@ -169,15 +184,36 @@ export class Http {
    * @param fallback - The fallback value if the input is not found
    * @returns The boolean value of the given key from the request body, params or query
    */
-  public boolean(key: string, fallback: boolean = false): boolean | undefined {
+  public boolean(key: string, fallback: string = "false"): boolean | undefined {
     this.validateProperties(["request"]);
 
-    const value = this.input(key, fallback);
+    const value = this.input<string>(key, fallback);
 
     // If the value is a string, convert it to a boolean
     return typeof value === "string"
       ? value.toLowerCase() === "true"
       : Boolean(value);
+  }
+
+  /**
+   * @description Get the file of the request wrapped in UploadedFile class
+   * @param key - The key/field name of the file (optional for single file uploads)
+   * @returns The file(s) of the given key from the request wrapped in UploadedFile class
+   */
+  public reqFiles<T = UploadedFile>(key?: string): T[] {
+    this.validateProperties(["request"]);
+
+    if (!this.request.files) return [];
+
+    if (!key) {
+      return this.request.files.map(
+        (f: Express.Multer.File) => new UploadedFile(f)
+      );
+    }
+
+    return this.request.files
+      .filter((f: Express.Multer.File) => f.fieldname === key)
+      .map((f: Express.Multer.File) => new UploadedFile(f));
   }
 }
 

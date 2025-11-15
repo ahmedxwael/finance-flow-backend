@@ -4,13 +4,18 @@ import favicon from "serve-favicon";
 import { registerRoutes } from "../config";
 import { PORT, __DEV__ } from "../config/env";
 import { errorHandler, notFoundHandler, staticFiles } from "../middlewares";
+import { UPLOADS_DIR_NAME } from "../modules/file-uploads/utils";
 import { log, logError } from "../shared/utils";
 
 /**
  * Setup middlewares for the Express app
  */
-function setupMiddlewares(app: Express): void {
+async function setupMiddlewares(app: Express): Promise<void> {
   app.use(staticFiles());
+  app.use(
+    "/uploads",
+    express.static(path.resolve(process.cwd(), UPLOADS_DIR_NAME))
+  );
   app.use(favicon(path.join(__dirname, "..", "public", "favicon.ico")));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
@@ -28,7 +33,7 @@ function setupErrorHandlers(app: Express): void {
  * Register routes and setup error handlers
  */
 export async function setupApp(app: Express): Promise<void> {
-  setupMiddlewares(app);
+  await setupMiddlewares(app);
   await registerRoutes(app);
   setupErrorHandlers(app);
 }

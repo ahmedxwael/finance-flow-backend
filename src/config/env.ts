@@ -2,6 +2,8 @@
 import "dotenv/config";
 
 // App Configuration
+export const APP_NAME = process.env.APP_NAME || "My App";
+export const APP_URL = process.env.APP_URL || "http://localhost:3000";
 export const PORT = process.env.PORT || 3000;
 export const __DEV__ = process.env.NODE_ENV === "development";
 export const API_PREFIX = process.env.API_PREFIX || "api";
