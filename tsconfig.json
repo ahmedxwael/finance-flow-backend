@@ -18,12 +18,9 @@
     "noEmit": true,
     "types": ["node", "express"],
     "typeRoots": ["./src/types", "./node_modules/@types"],
-    "baseUrl": "./",
+    "baseUrl": "./src",
     "paths": {
-      "core/*": ["core/*"],
-      "modules/*": ["modules/*"],
-      "shared/*": ["shared/*"],
-      "types/*": ["types/*"]
+      "@/*": ["*"]
     }
   },
   "include": ["src/**/*"],

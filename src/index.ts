@@ -1,5 +1,5 @@
 import express from "express";
-import { setupAppInitialization } from "./core";
+import { setupAppInitialization } from "@/core";
 
 // Create Express app
 const app = express();

@@ -1,5 +1,5 @@
 import { MongoClientOptions } from "mongodb";
-import { __DEV__ } from "./env";
+import { __DEV__ } from "@/config/env";
 
 /**
  * @description Get MongoDB connection options optimized for serverless environments

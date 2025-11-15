@@ -1,6 +1,6 @@
 import { readdir } from "fs/promises";
 import path from "path";
-import { log } from "./shared/utils";
+import { log } from "@/shared/utils";
 
 /**
  * Automatically imports all routes.ts files from the modules folder

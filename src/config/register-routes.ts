@@ -1,7 +1,7 @@
 import { Express } from "express";
-import { router } from "../core";
-import { importRoutes } from "../routes";
-import { log } from "../shared/utils";
+import { router } from "@/core";
+import { importRoutes } from "@/routes";
+import { log } from "@/shared/utils";
 
 export async function registerRoutes(app: Express) {
   try {

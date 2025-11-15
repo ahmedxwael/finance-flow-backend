@@ -1,8 +1,8 @@
 import { Express, NextFunction, Request, Response } from "express";
-import { __DEV__ } from "../config/env";
-import { logError } from "../shared/utils";
-import { connectToDB } from "./db";
-import { setupApp, startServer } from "./server";
+import { __DEV__ } from "@/config/env";
+import { logError } from "@/shared/utils";
+import { connectToDB } from "@/core/db";
+import { setupApp, startServer } from "@/core/server";
 
 // Serverless initialization state
 type InitState = {

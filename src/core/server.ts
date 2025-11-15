@@ -1,8 +1,8 @@
 import express, { Express } from "express";
-import { registerRoutes } from "../config";
-import { PORT, __DEV__ } from "../config/env";
-import { errorHandler, notFoundHandler, staticFiles } from "../middlewares";
-import { log, logError } from "../shared/utils";
+import { registerRoutes } from "@/config";
+import { PORT, __DEV__ } from "@/config/env";
+import { errorHandler, notFoundHandler, staticFiles } from "@/middlewares";
+import { log, logError } from "@/shared/utils";
 
 /**
  * Setup middlewares for the Express app

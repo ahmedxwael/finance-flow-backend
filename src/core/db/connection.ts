@@ -1,5 +1,5 @@
 import { MongoClient } from "mongodb";
-import { getConnectionOptions } from "../../config";
+import { getConnectionOptions } from "@/config";
 import {
   __DEV__,
   DATABASE_HOST,
@@ -8,9 +8,9 @@ import {
   DATABASE_PORT,
   DATABASE_URL,
   DATABASE_USER,
-} from "../../config/env";
-import { log, logError } from "../../shared/utils";
-import { Database, db } from "./db";
+} from "@/config/env";
+import { log, logError } from "@/shared/utils";
+import { Database, db } from "@/core/db/db";
 
 // Helper functions
 function buildConnectionUrl(): string {
