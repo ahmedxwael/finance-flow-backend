@@ -1,23 +1,23 @@
-import { MongoClient } from "mongodb";
 import { getConnectionOptions } from "@/config";
 import {
   __DEV__,
-  DATABASE_HOST,
-  DATABASE_NAME,
-  DATABASE_PASSWORD,
-  DATABASE_PORT,
-  DATABASE_URL,
-  DATABASE_USER,
+  DB_HOST,
+  DB_NAME,
+  DB_PASS,
+  DB_PORT,
+  DB_URL,
+  DB_USER,
 } from "@/config/env";
-import { log, logError } from "@/shared/utils";
-import { Database, db } from "@/core/db/db";
+import { log } from "@/shared/utils";
+import { MongoClient } from "mongodb";
+import { Database, db } from "./db";
 
 // Helper functions
 function buildConnectionUrl(): string {
-  if (!__DEV__ && DATABASE_URL) {
-    return DATABASE_URL;
+  if (!__DEV__ && DB_URL) {
+    return DB_URL;
   }
-  return `mongodb://${DATABASE_HOST}:${DATABASE_PORT}`;
+  return `mongodb://${DB_HOST}:${DB_PORT}`;
 }
 
 function sanitizeUrl(url: string): string {
@@ -80,23 +80,48 @@ export class DBConnection {
       validateConnectionUrl(connectionUrl);
 
       // Connect to database
-      const options = getConnectionOptions(DATABASE_USER, DATABASE_PASSWORD);
+      const options = getConnectionOptions(DB_USER, DB_PASS);
       log.info(
         `Connecting to database... [${__DEV__ ? "dev" : "prod"}] ${sanitizeUrl(connectionUrl)}`
       );
 
       this.client = await MongoClient.connect(connectionUrl, options);
-      this.clientDb = db.setDatabase(this.client.db(DATABASE_NAME));
+      this.clientDb = db.setDatabase(this.client.db(DB_NAME));
 
-      log.info(`Database connected successfully. db: ${DATABASE_NAME}`);
+      log.success(`Database connected successfully. db: ${DB_NAME}`);
 
-      if (__DEV__ && (!DATABASE_USER || !DATABASE_PASSWORD)) {
+      if (__DEV__ && (!DB_USER || !DB_PASS)) {
         log.warn("You're not making a secure database connection!");
       }
 
       return this.clientDb;
-    } catch (error) {
-      logError(error);
+    } catch (error: any) {
+      // Provide helpful error messages for common connection issues
+      if (
+        error?.code === "ECONNREFUSED" ||
+        error?.name === "MongoServerSelectionError"
+      ) {
+        const connectionUrl = buildConnectionUrl();
+        const sanitizedUrl = sanitizeUrl(connectionUrl);
+
+        log.error("Failed to connect to MongoDB server");
+        log.error(`Connection URL: ${sanitizedUrl}`);
+        log.error("");
+        log.error("Possible solutions:");
+        log.error("1. Make sure MongoDB is running locally:");
+        log.error(
+          "   - Windows: Check if MongoDB service is running in Services"
+        );
+        log.error("   - Or start MongoDB manually: mongod");
+        log.error(
+          "2. If using MongoDB Atlas (cloud), set DATABASE_URL in your .env file"
+        );
+        log.error(
+          "3. Verify your DATABASE_HOST and DATABASE_PORT in .env file"
+        );
+        log.error("4. Check your firewall settings");
+      }
+
       throw error;
     }
   }

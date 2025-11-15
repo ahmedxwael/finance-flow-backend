@@ -1,6 +1,6 @@
+import { log } from "@/shared/utils";
 import { readdir } from "fs/promises";
 import path from "path";
-import { log } from "@/shared/utils";
 
 /**
  * Automatically imports all routes.ts files from the modules folder
@@ -99,10 +99,17 @@ async function importRoutesFromDir(
 
       // Convert Windows paths to forward slashes
       const normalizedPath = relativePath.replace(/\\/g, "/");
-      const importPath = `./${normalizedPath}`;
 
+      // In production (dist), we need .js extension for ESM imports
+      // In development, ts-node handles .ts files
+      const isProduction = __dirname.includes("dist");
+      const importPath = isProduction
+        ? `./${normalizedPath}.js`
+        : `./${normalizedPath}`;
+
+      log.info(`Importing routes from ${importPath}`);
       await import(importPath);
-      log.debug(`Imported routes from ${importPath}`);
+      log.note(`Imported routes from ${importPath}`);
     } catch (error) {
       log.error(`Failed to import route file ${routeFile}:`, error);
       throw error;

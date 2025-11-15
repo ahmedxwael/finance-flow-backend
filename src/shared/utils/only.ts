@@ -1,4 +1,6 @@
-export const only = <T extends object, K extends keyof T>(
+import { GenericObject } from "@/types";
+
+export const only = <T extends GenericObject, K extends keyof T>(
   obj: T,
   keys: K[]
 ): Record<K, T[K]> => {

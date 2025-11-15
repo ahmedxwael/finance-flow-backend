@@ -1,5 +1,5 @@
-import { MongoClientOptions } from "mongodb";
 import { __DEV__ } from "@/config/env";
+import { MongoClientOptions } from "mongodb";
 
 /**
  * @description Get MongoDB connection options optimized for serverless environments
@@ -22,6 +22,14 @@ export function getConnectionOptions(
       username,
       password,
     };
+  }
+
+  // Add timeout options to fail faster when server is unavailable
+  // In development, use shorter timeouts for faster feedback
+  if (__DEV__) {
+    connectionOptions.serverSelectionTimeoutMS = 5000; // 5 seconds
+    connectionOptions.connectTimeoutMS = 5000; // 5 seconds
+    connectionOptions.socketTimeoutMS = 5000; // 5 seconds
   }
 
   return connectionOptions;
