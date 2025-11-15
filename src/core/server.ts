@@ -6,16 +6,23 @@ import { PORT, __DEV__ } from "../config/env";
 import { errorHandler, notFoundHandler, staticFiles } from "../middlewares";
 import { UPLOADS_DIR_NAME } from "../modules/file-uploads/utils";
 import { log, logError } from "../shared/utils";
+import { getBaseDirectory } from "../shared/utils/serverless";
+
+/**
+ * Get the uploads directory path
+ * In serverless environments, uses /tmp
+ */
+const getUploadsPath = (): string => {
+  const baseDir = getBaseDirectory();
+  return path.resolve(baseDir, UPLOADS_DIR_NAME);
+};
 
 /**
  * Setup middlewares for the Express app
  */
 async function setupMiddlewares(app: Express): Promise<void> {
   app.use(staticFiles());
-  app.use(
-    "/uploads",
-    express.static(path.resolve(process.cwd(), UPLOADS_DIR_NAME))
-  );
+  app.use("/uploads", express.static(getUploadsPath()));
   app.use(favicon(path.join(__dirname, "..", "public", "favicon.ico")));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));

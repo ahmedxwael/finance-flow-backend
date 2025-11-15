@@ -6,4 +6,5 @@ export * from "./get-token-from-headers";
 export * from "./hash-string";
 export * from "./logger";
 export * from "./only";
+export * from "./serverless";
 export * from "./valid-fields";

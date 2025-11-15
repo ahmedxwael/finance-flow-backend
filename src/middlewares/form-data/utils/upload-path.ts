@@ -1,5 +1,6 @@
 import path from "path";
 import { UPLOADS_DIR_NAME } from "../../../modules/file-uploads/utils";
+import { getBaseDirectory } from "../../../shared/utils";
 
 /**
  * Sanitize fieldname to prevent path traversal attacks
@@ -15,6 +16,7 @@ export const sanitizeFieldname = (fieldName: string): string => {
 
 /**
  * Get safe upload path with sanitized fieldname
+ * In serverless environments, files are stored in /tmp
  */
 export const getUploadPath = (fieldName: string): string => {
   const sanitized = sanitizeFieldname(fieldName);
@@ -23,5 +25,7 @@ export const getUploadPath = (fieldName: string): string => {
     throw new Error("Invalid fieldname");
   }
 
-  return path.join(UPLOADS_DIR_NAME, sanitized);
+  const baseDir = getBaseDirectory();
+
+  return path.join(baseDir, UPLOADS_DIR_NAME, sanitized);
 };
