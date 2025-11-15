@@ -42,11 +42,13 @@ const getCallerInfo = (): string | null => {
   const fileName = caller.getFileName();
   if (!fileName) return null;
 
-  const relativePath = path.relative(process.cwd(), fileName);
+  const relativePath = path.basename(fileName);
   const lineNumber = caller.getLineNumber();
   const columnNumber = caller.getColumnNumber();
 
-  return chalk.magenta(`(${relativePath}:${lineNumber}:${columnNumber})`);
+  return chalk.cyanBright.dim(
+    `[${relativePath}:${lineNumber}:${columnNumber}]`
+  );
 };
 
 // Log level hierarchy for filtering
@@ -57,6 +59,7 @@ const logLevels = {
   warn: 3,
   error: 4,
   success: 2, // Same as info
+  note: 5,
 };
 
 // Check if a log level should be displayed
@@ -69,22 +72,13 @@ const shouldLog = (level: keyof typeof logLevels): boolean => {
 
 // Color mappings for different log levels
 const colors = {
-  error: chalk.red.bold,
-  warn: chalk.yellow.bold,
-  info: chalk.blueBright.bold,
-  debug: chalk.gray.bold,
-  success: chalk.green.bold,
-  trace: chalk.blue.bold,
-};
-
-// Symbol mappings for log levels
-const symbols = {
-  error: "❌",
-  warn: "⚠️ ",
-  info: "ℹ️ ",
-  debug: "🔍",
-  success: "✅",
-  trace: "↗️ ",
+  error: chalk.red,
+  warn: chalk.yellow,
+  info: chalk.cyanBright,
+  debug: chalk.gray,
+  success: chalk.green,
+  trace: chalk.blue,
+  note: chalk.white.dim,
 };
 
 /**
@@ -108,9 +102,9 @@ const formatMessage = (
   }
 ): string => {
   const color = colors[level];
-  const symbol = symbols[level];
-  const timestamp = chalk.gray(`[${formatTime()}]`);
-  const levelLabel = color(`${symbol} [${level.toUpperCase()}]`);
+  // const symbol = symbols[level];
+  const timestamp = chalk.yellow(`[${formatTime()}]`);
+  const levelLabel = color(`[${level.toUpperCase()}]`);
   const messageLabel = color(message);
 
   let formattedMessage = `${timestamp} ${levelLabel}`;
@@ -266,6 +260,20 @@ export const log = {
       console.log(formatted);
     }
   },
+
+  /**
+   * Log a separator
+   */
+  note: (
+    message: string,
+    data?: any,
+    options?: { module?: string; context?: Record<string, any> }
+  ) => {
+    if (shouldLog("note")) {
+      const formatted = formatMessage("note", message, data, options);
+      console.log(formatted);
+    }
+  },
 };
 
 /**
@@ -281,11 +289,10 @@ export const logError = (
 
   // Format error with chalk
   const timestamp = chalk.grey(`[${formatTime()}]`);
-  const errorSymbol = colors.error(symbols.error);
   const errorLabel = colors.error("[ERROR]");
 
   console.error(
-    `${timestamp} ${errorSymbol} ${errorLabel} ${colors.error(errorName)}: ${errorMessage}`
+    `${timestamp} ${errorLabel} ${colors.error(errorName)}: ${errorMessage}`
   );
 
   if (context) {

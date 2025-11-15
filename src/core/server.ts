@@ -2,7 +2,7 @@ import express, { Express } from "express";
 import path from "path";
 import favicon from "serve-favicon";
 import { registerRoutes } from "../config";
-import { PORT, __DEV__ } from "../config/env";
+import { APP_HOST, APP_PORT, __DEV__ } from "../config/env";
 import { errorHandler, notFoundHandler, staticFiles } from "../middlewares";
 import { getAllowedUploadsPath, log, logError } from "../shared/utils";
 
@@ -44,8 +44,8 @@ export async function startServer(app: Express): Promise<void> {
     await setupApp(app);
 
     if (__DEV__) {
-      app.listen(PORT, () => {
-        log.info(`Server is running on port http://localhost:${PORT}`);
+      app.listen(APP_PORT, () => {
+        log.success(`Server is running on http://${APP_HOST}:${APP_PORT}`);
       });
     }
   } catch (error) {

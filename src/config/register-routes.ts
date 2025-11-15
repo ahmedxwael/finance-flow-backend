@@ -12,7 +12,7 @@ export async function registerRoutes(app: Express) {
     router.scan(app);
 
     const routes = router.getRoutes();
-    log.info(`Registered ${routes.length} route(s)`);
+    log.success(`Registered ${routes.length} route(s)`);
   } catch (error) {
     log.error("Failed to register routes:", error);
     throw error;

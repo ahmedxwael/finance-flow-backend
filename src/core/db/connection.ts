@@ -2,22 +2,22 @@ import { MongoClient } from "mongodb";
 import { getConnectionOptions } from "../../config";
 import {
   __DEV__,
-  DATABASE_HOST,
-  DATABASE_NAME,
-  DATABASE_PASSWORD,
-  DATABASE_PORT,
-  DATABASE_URL,
-  DATABASE_USER,
+  DB_HOST,
+  DB_NAME,
+  DB_PASS,
+  DB_PORT,
+  DB_URL,
+  DB_USER,
 } from "../../config/env";
 import { log } from "../../shared/utils";
 import { Database, db } from "./db";
 
 // Helper functions
 function buildConnectionUrl(): string {
-  if (!__DEV__ && DATABASE_URL) {
-    return DATABASE_URL;
+  if (!__DEV__ && DB_URL) {
+    return DB_URL;
   }
-  return `mongodb://${DATABASE_HOST}:${DATABASE_PORT}`;
+  return `mongodb://${DB_HOST}:${DB_PORT}`;
 }
 
 function sanitizeUrl(url: string): string {
@@ -80,17 +80,17 @@ export class DBConnection {
       validateConnectionUrl(connectionUrl);
 
       // Connect to database
-      const options = getConnectionOptions(DATABASE_USER, DATABASE_PASSWORD);
+      const options = getConnectionOptions(DB_USER, DB_PASS);
       log.info(
         `Connecting to database... [${__DEV__ ? "dev" : "prod"}] ${sanitizeUrl(connectionUrl)}`
       );
 
       this.client = await MongoClient.connect(connectionUrl, options);
-      this.clientDb = db.setDatabase(this.client.db(DATABASE_NAME));
+      this.clientDb = db.setDatabase(this.client.db(DB_NAME));
 
-      log.info(`Database connected successfully. db: ${DATABASE_NAME}`);
+      log.success(`Database connected successfully. db: ${DB_NAME}`);
 
-      if (__DEV__ && (!DATABASE_USER || !DATABASE_PASSWORD)) {
+      if (__DEV__ && (!DB_USER || !DB_PASS)) {
         log.warn("You're not making a secure database connection!");
       }
 

@@ -4,7 +4,8 @@ import "dotenv/config";
 // App Configuration
 export const APP_NAME = process.env.APP_NAME || "My App";
 export const APP_URL = process.env.APP_URL || "http://localhost:3000";
-export const PORT = process.env.PORT || 3000;
+export const APP_PORT = process.env.PORT || 3000;
+export const APP_HOST = process.env.HOST || "localhost";
 export const __DEV__ = process.env.NODE_ENV === "development";
 export const API_PREFIX = process.env.API_PREFIX || "api";
 
@@ -12,12 +13,12 @@ export const API_PREFIX = process.env.API_PREFIX || "api";
 export const LOG_LEVEL = process.env.LOG_LEVEL || (__DEV__ ? "debug" : "info");
 
 // MongoDB Configuration
-export const DATABASE_NAME = process.env.DATABASE_NAME;
-export const DATABASE_HOST = process.env.DATABASE_HOST || "localhost";
-export const DATABASE_PORT = process.env.DATABASE_PORT || 27017;
-export const DATABASE_URL = process.env.DATABASE_URL;
-export const DATABASE_USER = process.env.DATABASE_USER;
-export const DATABASE_PASSWORD = process.env.DATABASE_PASSWORD;
+export const DB_NAME = process.env.DATABASE_NAME;
+export const DB_HOST = process.env.DATABASE_HOST || "localhost";
+export const DB_PORT = process.env.DATABASE_PORT || 27017;
+export const DB_URL = process.env.DATABASE_URL;
+export const DB_USER = process.env.DATABASE_USER;
+export const DB_PASS = process.env.DATABASE_PASSWORD;
 
 // JWT Configuration
 export const JWT_SECRET = process.env.JWT_SECRET!;

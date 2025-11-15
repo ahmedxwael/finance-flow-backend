@@ -101,8 +101,9 @@ async function importRoutesFromDir(
       const normalizedPath = relativePath.replace(/\\/g, "/");
       const importPath = `./${normalizedPath}`;
 
+      log.info(`Importing routes from ${importPath}`);
       await import(importPath);
-      log.debug(`Imported routes from ${importPath}`);
+      log.note(`Imported routes from ${importPath}`);
     } catch (error) {
       log.error(`Failed to import route file ${routeFile}:`, error);
       throw error;
