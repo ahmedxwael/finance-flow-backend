@@ -1,22 +1,23 @@
 import { registerRoutes } from "@/config";
 import { __DEV__, APP_HOST, APP_PORT } from "@/config/env";
-import { errorHandler, notFoundHandler, staticFiles } from "@/middlewares";
+import {
+  errorHandler,
+  faviconMiddleware,
+  notFoundHandler,
+  staticFiles,
+} from "@/middlewares";
 import { getAllowedUploadsPath, log, logError } from "@/shared/utils";
 import express, { Express } from "express";
-import path from "path";
-import favicon from "serve-favicon";
 
 /**
  * Setup middlewares for the Express app
  */
 async function setupMiddlewares(app: Express): Promise<void> {
   app.use(staticFiles());
-  // Serve uploaded files from the allowed uploads directory
-  // Uses getAllowedUploadsPath() for consistency with security checks
-  app.use("/uploads", express.static(getAllowedUploadsPath()));
-  app.use(favicon(path.join(__dirname, "..", "public", "favicon.ico")));
+  app.use(faviconMiddleware());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use("/uploads", express.static(getAllowedUploadsPath()));
 }
 
 /**
