@@ -1,7 +1,6 @@
 # node
 node_modules/
-package-lock.json
-
+dist/
 
 # env files
 .env

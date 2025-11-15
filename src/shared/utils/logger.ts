@@ -46,7 +46,7 @@ const getCallerInfo = (): string | null => {
   const lineNumber = caller.getLineNumber();
   const columnNumber = caller.getColumnNumber();
 
-  return chalk.cyanBright.dim(
+  return chalk.yellowBright.dim(
     `[${relativePath}:${lineNumber}:${columnNumber}]`
   );
 };

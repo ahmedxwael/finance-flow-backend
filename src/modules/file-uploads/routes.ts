@@ -1,4 +1,4 @@
-import { router } from "../../core";
+import { router } from "@/core";
 import { uploadAny, validateRequest } from "../../middlewares";
 import { removeFilesController, uploadFilesController } from "./controllers";
 import { FILE_VALIDATION_CONFIG, removeFilesValidator } from "./validators";

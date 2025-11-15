@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/index.ts",
+    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/index.ts",
     "start": "node dist/index.js",
-    "build": "tsc && tsc-alias",
+    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json && copyfiles -u 1 src/public/**/* dist",
     "format": "prettier --write \"src/**/*.{ts,tsx,json,md}\"",
     "lint": "eslint \"src/**/*.ts\""
   },
@@ -50,6 +50,7 @@
     "@types/nanoid": "^3.0.0",
     "@types/node": "^24.3.0",
     "@types/nodemailer": "^7.0.1",
+    "copyfiles": "^2.4.1",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.2.0",
