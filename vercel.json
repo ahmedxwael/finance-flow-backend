@@ -1,20 +1,11 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "src/index.ts",
-      "use": "@vercel/node"
-    }
-  ],
+  "buildCommand": "yarn vercel-build",
+  "outputDirectory": "dist",
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "src/index.ts"
+      "dest": "/index.js"
     }
-  ],
-  "functions": {
-    "src/index.ts": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  ]
 }
