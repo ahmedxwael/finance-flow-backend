@@ -1,7 +1,7 @@
 import { Request } from "express";
 import fs from "fs/promises";
 import path from "path";
-import { ensureDirectory, hashBuffer } from "../../../shared/utils";
+import { ensureDirectory, hashBuffer, validateFilePath } from "../../../shared/utils";
 import { log } from "../../../shared/utils/logger";
 import { getUploadPath } from "./upload-path";
 
@@ -44,6 +44,9 @@ export const processFileDeduplication = async (
   const uploadPath = getUploadPath(file.fieldname);
   const destinationPath = ensureDirectory(uploadPath);
   const finalFilePath = path.join(destinationPath, hashedFileName);
+
+  // Security: Prevent directory traversal attacks
+  validateFilePath(finalFilePath);
 
   const exists = await fileExists(finalFilePath);
 

@@ -3,7 +3,7 @@ import { existsSync, readdirSync, rmdirSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
 import { http } from "../../../core";
-import { getBaseDirectory } from "../../../shared/utils";
+import { getBaseDirectory, validateFilePath } from "../../../shared/utils";
 import { UPLOADS_DIR_NAME } from "../utils";
 
 interface FileToDelete {
@@ -54,6 +54,9 @@ const findAndDeleteFile = async (
 ): Promise<void> => {
   const baseDir = getBaseDirectory();
   const filePath = path.join(baseDir, UPLOADS_DIR_NAME, fieldname, filename);
+
+  // Security: Prevent directory traversal attacks
+  validateFilePath(filePath);
 
   if (!existsSync(filePath)) {
     throw new Error(`File "${filename}" not found in folder "${fieldname}"`);
