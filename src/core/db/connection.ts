@@ -88,7 +88,7 @@ export class DBConnection {
       this.client = await MongoClient.connect(connectionUrl, options);
       this.clientDb = db.setDatabase(this.client.db(DB_NAME));
 
-      log.success(`Database connected successfully. db: ${DB_NAME}`);
+      log.success(`Database connected successfully (${DB_NAME})`);
 
       if (__DEV__ && (!DB_USER || !DB_PASS)) {
         log.warn("You're not making a secure database connection!");
